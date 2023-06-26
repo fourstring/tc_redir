@@ -1,0 +1,3 @@
+[submodule "tc_redir_libbpf"]
+	path = tc_redir_libbpf
+	url = https://github.com/fourstring/tc_redir_libbpf.git
