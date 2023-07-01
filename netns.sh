@@ -8,6 +8,7 @@ fi
 
 BR_ADDR="10.10.0.1"
 BR_DEV="br0"
+VIRTUAL_NEIGH="10.10.0.1"
 
 NS1="ns1"
 VETH1="veth1"
@@ -61,6 +62,9 @@ ip netns exec ${NS2} ip neigh add ${VPEER_ADDR1} dev vpeer2 lladdr ${VETH2_MAC}
 
 # add neighbors to bypass ARP
 
+ip netns exec ${NS1} ip neigh add ${VIRTUAL_NEIGH} dev vpeer1 lladdr ${VETH1_MAC}
+ip netns exec ${NS2} ip neigh add ${VIRTUAL_NEIGH} dev vpeer2 lladdr ${VETH2_MAC}
+
 # setup bridge
 # ip link add ${BR_DEV} type bridge
 # ip link set ${BR_DEV} up
@@ -73,8 +77,11 @@ ip netns exec ${NS2} ip neigh add ${VPEER_ADDR1} dev vpeer2 lladdr ${VETH2_MAC}
 # ip addr add ${BR_ADDR}/16 dev ${BR_DEV}
 
 # add default routes for ns
-ip netns exec ${NS1} ip route add default dev ${VPEER1}
-ip netns exec ${NS2} ip route add default dev ${VPEER2}
+ip netns exec ${NS1} ip route add default via ${VIRTUAL_NEIGH} dev ${VPEER1}
+ip netns exec ${NS2} ip route add default via ${VIRTUAL_NEIGH} dev ${VPEER2}
+
+ip netns exec ${NS1} ip route add 10.10.0.0/16 dev ${VPEER1}
+ip netns exec ${NS2} ip route add 10.10.0.0/16 dev ${VPEER2}
 
 # enable ip forwarding
 # bash -c 'echo 1 > /proc/sys/net/ipv4/ip_forward'
